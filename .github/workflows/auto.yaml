@@ -29,5 +29,6 @@ jobs:
         git add .
         git config --global user.email "action@example.com"
         git config --global user.name "action"
-        git commit -m "updated by github actions from guide-microprofile-opentracing"
+        git checkout -b actions-mp-ot
         git push -u origin actions-mp-ot
+        git commit -m "updated by github actions from ${{ github.event.client_payload.repository }}"
