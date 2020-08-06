@@ -18,12 +18,12 @@ jobs:
          SUPER_SECRET: ${{ secrets.SuperSecret }}
     - name: run converter
       run: |
-        git add .
         mkdir -p instructions/${{ github.event.client_payload.repository }}/
         rm -f instructions/${{ github.event.client_payload.repository }}/README.md
         javac GuideConverter.java
         java GuideConverter ${{ github.event.client_payload.repository }}
         rm -f temp.adoc
+        git add .
         git config --global user.email "action@example.com"
         git config --global user.name "action"
         git commit -m "updated by github actions from ${{ github.event.client_payload.repository }}"
