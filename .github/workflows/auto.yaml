@@ -21,6 +21,7 @@ jobs:
         git add .
         git init
         git checkout -b action
+        git pull origin action
         mkdir -p instructions/${{ github.event.client_payload.repository }}/
         rm -f instructions/${{ github.event.client_payload.repository }}/README.md
         javac GuideConverter.java
