@@ -19,6 +19,7 @@ jobs:
     - name: run converter
       run: |
         git checkout -b actions-mp-ot
+        git pull
         git add .
         mkdir -p instructions/${{ github.event.client_payload.repository }}/
         rm -f instructions/${{ github.event.client_payload.repository }}/README.md
