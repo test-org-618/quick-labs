@@ -27,11 +27,6 @@ jobs:
         rm -f temp.adoc
         git config --global user.email "action@example.com"
         git config --global user.name "action"
+        git checkout -b your-branch-name
         git commit -m "updated by github actions from ${{ github.event.client_payload.repository }}"
-        git checkout $remote
-        git status
-        git merge $local
-        git push
-        git status
-        git checkout $local
-        git status
+        git push --set-upstream origin your-branch-name
