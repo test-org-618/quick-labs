@@ -28,7 +28,6 @@ jobs:
         git add .
         git config --global user.email "action@example.com"
         git config --global user.name "action"
-        git checkout -b your-branch-name
         git commit -m "updated by github actions from ${{ github.event.client_payload.repository }}"
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v3
