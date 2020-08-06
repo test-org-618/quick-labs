@@ -18,13 +18,13 @@ jobs:
          SUPER_SECRET: ${{ secrets.SuperSecret }}
     - name: run converter
       run: |
-        git add .
-        git add -u
+        git init
         mkdir -p instructions/${{ github.event.client_payload.repository }}/
         rm -f instructions/${{ github.event.client_payload.repository }}/README.md
         javac GuideConverter.java
         java GuideConverter ${{ github.event.client_payload.repository }}
         rm -f temp.adoc
+        git add .
         git config --global user.email "action@example.com"
         git config --global user.name "action"
         git checkout -b your-branch-name
