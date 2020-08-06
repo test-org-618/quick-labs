@@ -31,3 +31,7 @@ jobs:
         git commit -m "updated by github actions from ${{ github.event.client_payload.repository }}"
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v3
+      with:
+         title: "Change to ${{ github.event.client_payload.repository }}"
+         body: "Updated by github actions by the ${{ github.event.client_payload.repository }} repo"
+         branch: "${{ github.event.client_payload.repository }} action"
