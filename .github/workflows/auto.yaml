@@ -34,4 +34,4 @@ jobs:
       with:
          title: "Change to ${{ github.event.client_payload.repository }}"
          body: "Updated by github actions by the ${{ github.event.client_payload.repository }} repo"
-         branch: "${{ github.event.client_payload.repository }} action"
+         branch: "${{ github.event.client_payload.repository }}/action"
