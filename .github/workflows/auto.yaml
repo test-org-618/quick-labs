@@ -24,6 +24,8 @@ jobs:
         java GuideConverter ${{ github.event.client_payload.repository }}
         rm -f temp.adoc
         git add .
+        git checkout action
+        git pull origin master
         git config --global user.email "action@example.com"
         git config --global user.name "action"
         git commit -m "updated by github actions from ${{ github.event.client_payload.repository }}"
