@@ -18,6 +18,8 @@ jobs:
          SUPER_SECRET: ${{ secrets.SuperSecret }}
     - name: run converter
       run: |
+        git add .
+        git add -u
         mkdir -p instructions/${{ github.event.client_payload.repository }}/
         rm -f instructions/${{ github.event.client_payload.repository }}/README.md
         javac GuideConverter.java
