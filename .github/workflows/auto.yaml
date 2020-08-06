@@ -19,6 +19,7 @@ jobs:
     - name: run converter
       run: |
         git add .
+        git init
         git checkout -b action
         git pull origin master
         mkdir -p instructions/${{ github.event.client_payload.repository }}/
