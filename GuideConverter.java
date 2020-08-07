@@ -16,7 +16,7 @@ public class GuideConverter{
  	String guideName = args[0];
         getMD(guideName);
         System.out.println("Guide converted");
-        System.out.println("Find markdown in instructions/"+guideName+"/"+guideName+.md");
+        System.out.println("Find markdown in instructions/"+guideName+"/"+guideName+".md");
         
     }
 
