@@ -16,7 +16,7 @@ public class GuideConverter{
  	String guideName = args[0];
         getMD(guideName);
         System.out.println("Guide converted");
-        System.out.println("Find markdown in instructions/"+guideName+".md");
+        System.out.println("Find markdown in instructions/"+guideName+"/"+guideName+.md");
         
     }
 
@@ -105,7 +105,7 @@ public class GuideConverter{
 
     public static void removeLast(String guideName){
         try{
-            java.io.RandomAccessFile file = new java.io.RandomAccessFile(guideName+".md", "rw");
+            java.io.RandomAccessFile file = new java.io.RandomAccessFile("instructions/"+guideName+"/"+guideName+".md", "rw");
             byte b = 0;
             long pos = file.length();
             while (b != '\n' && --pos >= 0) {
