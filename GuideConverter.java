@@ -548,7 +548,7 @@ public class GuideConverter{
     // append to md file
     public static void writeToFile(String str, String guideName) 
     throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter("instructions/"+guideName+".md",true));
+        BufferedWriter writer = new BufferedWriter(new FileWriter("instructions/"+guideName+"/"+guideName+".md",true));
         writer.append("\n"+str);
         writer.close();
     }
