@@ -2,7 +2,7 @@
 # Creating a multi-module application
 ## What you'll learn
 
-Demo test 7/8 10:00
+Demo test 7/8 11:26
 
 A Java Platform, Enterprise Edition (Java EE) application consists of modules that work together as one entity. An enterprise archive (EAR) is a wrapper for a Java EE application, which consists of web archive (WAR) and Java archive (JAR) files. Package modules and resources into an EAR file to deploy or distribute the Java EE application to new environments.
 
@@ -96,6 +96,66 @@ Replace the war/POM file.
 
 
 ```
+<?xml version='1.0' encoding='utf-8'?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+    http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.openliberty.guides</groupId>
+    <artifactId>guide-maven-multimodules-war</artifactId>
+    <packaging>war</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <name>guide-maven-multimodules-war</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
+    <dependencies>
+
+        <!-- Provided dependencies -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.platform</groupId>
+            <artifactId>jakarta.jakartaee-api</artifactId>
+            <version>8.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.microprofile</groupId>
+            <artifactId>microprofile</artifactId>
+            <version>3.3</version>
+            <type>pom</type>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- tag::dependency[] -->
+        <dependency>
+            <groupId>io.openliberty.guides</groupId>
+            <artifactId>guide-maven-multimodules-jar</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <!-- end::dependency[] -->
+
+    </dependencies>
+
+</project>
+```
+{: codeblock}
+
+
 
 The **<dependency/>** element is the Java library module that implements the functions that you need for the unit converter.
 
@@ -108,6 +168,54 @@ Replace the `HeightsBean` class.
 
 
 ```
+package io.openliberty.guides.multimodules.web;
+
+public class HeightsBean implements java.io.Serializable {
+    private String heightCm = null;
+    private String heightFeet = null;
+    private String heightInches = null;
+    private int cm = 0;
+    private int feet = 0;
+    private int inches = 0;
+
+    public HeightsBean() {
+    }
+
+    public String getHeightCm() {
+        return heightCm;
+    }
+
+    public String getHeightFeet() {
+        return heightFeet;
+    }
+
+    public String getHeightInches() {
+        return heightInches;
+    }
+
+    public void setHeightCm(String heightcm) {
+        this.heightCm = heightcm;
+    }
+
+    public void setHeightFeet(String heightfeet) {
+        this.cm = Integer.valueOf(heightCm);
+        this.feet = io.openliberty.guides.multimodules.lib.Converter.getFeet(cm);
+        String result = String.valueOf(feet);
+        this.heightFeet = result;
+    }
+
+    public void setHeightInches(String heightinches) {
+        this.cm = Integer.valueOf(heightCm);
+        this.inches = io.openliberty.guides.multimodules.lib.Converter.getInches(cm);
+        String result = String.valueOf(inches);
+        this.heightInches = result;
+    }
+
+}
+```
+{: codeblock}
+
+
 
 
 The **getFeet(cm)** invocation was added to the **setHeightFeet** method to convert a measurement into feet.
@@ -128,6 +236,152 @@ Replace the ear/POM file.
 
 
 ```
+<?xml version='1.0' encoding='utf-8'?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+    http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- tag::packaging[] -->
+    <groupId>io.openliberty.guides</groupId>
+    <artifactId>guide-maven-multimodules-ear</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <!-- tag::packagingType[] -->
+    <packaging>ear</packaging>
+    <!-- end::packagingType[] -->
+    <!-- end::packaging[] -->
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <!-- Liberty configuration -->
+        <liberty.var.default.http.port>9080</liberty.var.default.http.port>
+        <liberty.var.default.https.port>9443</liberty.var.default.https.port>
+    </properties>
+
+    <dependencies>
+        <!-- web and jar modules as dependencies -->
+        <!-- tag::dependencies[] -->
+        <!-- tag::dependency-jar[] -->
+        <dependency>
+            <groupId>io.openliberty.guides</groupId>
+            <artifactId>guide-maven-multimodules-jar</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <type>jar</type>
+        </dependency>
+        <!-- end::dependency-jar[] -->
+        <!-- tag::dependency-war[] -->
+        <dependency>
+            <groupId>io.openliberty.guides</groupId>
+            <artifactId>guide-maven-multimodules-war</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <!-- tag::warType[] -->
+            <type>war</type>
+            <!-- end::warType[] -->
+        </dependency>
+        <!-- end::dependency-war[] -->
+        <!-- end::dependencies[] -->
+
+        <!-- For tests -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.6.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <!-- tag::maven-ear-plugin[] -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-ear-plugin</artifactId>
+                <version>3.0.2</version>
+                <configuration>
+                    <modules>
+                        <!-- tag::jarModule[] -->
+                        <jarModule>
+                            <groupId>io.openliberty.guides</groupId>
+                            <artifactId>guide-maven-multimodules-jar</artifactId>
+                            <uri>/guide-maven-multimodules-jar-1.0-SNAPSHOT.jar</uri>
+                        </jarModule>
+                        <!-- end::jarModule[] -->
+                        <!-- tag::webModule[] -->
+                        <webModule>
+                            <groupId>io.openliberty.guides</groupId>
+                            <artifactId>guide-maven-multimodules-war</artifactId>
+                            <uri>/guide-maven-multimodules-war-1.0-SNAPSHOT.war</uri>
+                            <!-- Set custom context root -->
+                            <!-- tag::contextRoot[] -->
+                            <contextRoot>/converter</contextRoot>
+                            <!-- end::contextRoot[] -->
+                        </webModule>
+                        <!-- end::webModule[] -->
+                    </modules>
+                </configuration>
+            </plugin>
+            <!-- end::maven-ear-plugin[] -->
+
+            <!-- Enable liberty-maven plugin -->
+            <!-- tag::liberty-maven-plugin[] -->
+            <plugin>
+                <groupId>io.openliberty.tools</groupId>
+                <artifactId>liberty-maven-plugin</artifactId>
+                <version>3.2</version>
+            </plugin>
+            <!-- end::liberty-maven-plugin[] -->
+
+            <!-- Since the package type is ear,
+            need to run testCompile to compile the tests -->
+            <!-- tag::maven-compiler-plugin[] -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <executions>
+                    <execution>
+                        <phase>test-compile</phase>
+                        <!-- tag::testCompile[] -->
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                        <!-- end::testCompile[] -->
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- end::maven-compiler-plugin[] -->
+
+            <!-- Plugin to run integration tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.22.2</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <default.http.port>
+                            ${liberty.var.default.http.port}
+                        </default.http.port>
+                        <default.https.port>
+                            ${liberty.var.default.https.port}
+                        </default.https.port>
+                        <cf.context.root>/converter</cf.context.root>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
+```
+{: codeblock}
+
+
 
 
 Set the **basic configuration** for the project and set the **<packaging/>** element to **ear**.
@@ -151,6 +405,28 @@ touch ear/src/main/liberty/config/server.xml
 > [File -> Open]guide-maven-multimodules/start/ear/src/main/liberty/config/server.xml
 ```
 
+<server description="Sample Liberty server">
+
+    <featureManager>
+        <feature>jsp-2.3</feature>
+    </featureManager>
+
+    <variable name="default.http.port" defaultValue="9080" />
+    <variable name="default.https.port" defaultValue="9443" />
+
+    <!-- tag::server[] -->
+    <httpEndpoint host="*" httpPort="${default.http.port}"
+        httpsPort="${default.https.port}" id="defaultHttpEndpoint" />
+
+    <enterpriseApplication id="guide-maven-multimodules-ear"
+        location="guide-maven-multimodules-ear.ear"
+        name="guide-maven-multimodules-ear" />
+    <!-- end::server[] -->
+</server>
+```
+{: codeblock}
+
+
 
 
 
@@ -167,6 +443,37 @@ Replace the start/POM file.
 
 
 ```
+<?xml version='1.0' encoding='utf-8'?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+    http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- tag::packaging[] -->
+    <!-- tag::groupId[] -->
+    <groupId>io.openliberty.guides</groupId>
+    <!-- end::groupId[] -->
+    <artifactId>guide-maven-multimodules</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <!-- tag::packagingType[] -->
+    <packaging>pom</packaging>
+    <!-- end::packagingType[] -->
+    <!-- end::packaging[] -->
+
+    <!-- tag::modules[] -->
+    <modules>
+        <module>jar</module>
+        <module>war</module>
+        <module>ear</module>
+    </modules>
+    <!-- end::modules[] -->
+</project>
+```
+{: codeblock}
+
+
 
 Set the **basic configuration** for the project. Set **pom** as the **<packaging/>** element of the parent **pom.xml** file.
 
