@@ -16,7 +16,7 @@ public class GuideConverter{
  	String guideName = args[0];
         getMD(guideName);
         System.out.println("Guide converted");
-        System.out.println("Find markdown in "+guideName+".md");
+        System.out.println("Find markdown in instructions/"+guideName+".md");
         
     }
 
@@ -548,7 +548,7 @@ public class GuideConverter{
     // append to md file
     public static void writeToFile(String str, String guideName) 
     throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(guideName+".md",true));
+        BufferedWriter writer = new BufferedWriter(new FileWriter("instructions/"+guideName+".md",true));
         writer.append("\n"+str);
         writer.close();
     }
