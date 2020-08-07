@@ -16,7 +16,7 @@ public class GuideConverter{
  	String guideName = args[0];
         getMD(guideName);
         System.out.println("Guide converted");
-        System.out.println("Find markdown in instructions/"+guideName+"/README.md");
+        System.out.println("Find markdown in "+guideName+".md");
         
     }
 
@@ -105,7 +105,7 @@ public class GuideConverter{
 
     public static void removeLast(String guideName){
         try{
-            java.io.RandomAccessFile file = new java.io.RandomAccessFile("instructions/"+guideName+"/README.md", "rw");
+            java.io.RandomAccessFile file = new java.io.RandomAccessFile(guideName+".md", "rw");
             byte b = 0;
             long pos = file.length();
             while (b != '\n' && --pos >= 0) {
@@ -179,11 +179,13 @@ public class GuideConverter{
     //configures link
     public static void link(String inputLine, String guideName){
         try{
+            System.out.println(inputLine);
             String linkParts[] = new String[2];
             String findLink[];
             String link;
             String description;
             String formattedLink;
+            String localhostSplit[]; 
             String findDescription[];
             inputLine = inputLine.replaceAll("\\{","");
             inputLine = inputLine.replaceAll("\\}","");
@@ -193,9 +195,18 @@ public class GuideConverter{
             findLink = linkParts[0].split(" ");
             link = findLink[findLink.length-1];
             if(link.contains("localhost")){
-                inputLine = inputLine.replaceAll(link+"\\["+description+"\\^\\]","\n```\ncurl "+link+"\n```\n{: codeblock}\n\n");
-                writeToFile(inputLine, guideName);
-                return;
+                if(inputLine.contains(".")){
+                    localhostSplit = inputLine.split("\\.");
+                    System.out.println(localhostSplit[0]);
+                    inputLine = inputLine.replaceAll(link+"\\["+description+"\\^\\]", "");
+                    inputLine = localhostSplit[0] + localhostSplit[1] +  ("\n```\ncurl "+link+"\n```\n{: codeblock}\n\n");
+                    
+                    writeToFile(inputLine, guideName);
+                    return;
+                }
+                else{
+                    inputLine = inputLine.replaceAll(link+"\\["+description+"\\^\\]", ("\n```\ncurl "+link+"\n```\n{: codeblock}\n\n") );
+                }
             }
             formattedLink = "[" + description + "](" + link + ")";
             inputLine = inputLine.replaceAll(link+"\\["+description+"\\^\\]",formattedLink);
@@ -220,6 +231,7 @@ public class GuideConverter{
                         inputLine = inputLine.replaceAll("”€â”€","__");
                         inputLine = inputLine.replaceAll("â”œâ","  |");
                         inputLine = inputLine.replaceAll("â”‚","");
+                        inputLine = inputLine.replaceAll("â€™","`");
                         inputLine = inputLine.replaceAll("\\[hotspot(.*?)\\]","");
 
                         if(inputLine.equals("******")){
@@ -309,7 +321,7 @@ public class GuideConverter{
     
     public static void getMD(String guideName){
         try{
-            //read adoc file
+            //read adoc file from the open liberty guide
             String httpsURL = "https://raw.githubusercontent.com/openliberty/"+guideName+"/master/README.adoc";
             String FILENAME = "temp.adoc";
             BufferedWriter bw = new BufferedWriter(new FileWriter(FILENAME));
@@ -324,15 +336,29 @@ public class GuideConverter{
             String inputLine;
             int positionNumber = 0;
             //stores the start of irrelevant lines
-            String[] startingPhrases = {"//",":","[source","NOTE:","include::","[role=","[.tab_"};
+            String[] startingPhrases = {"//",":","[source","NOTE:","include::","[role=","[.tab_","image::"};
             //write each line into the file
             while ((inputLine = in.readLine()) != null) {
 
+                //configure table
                 if(position.equals("table")){
                     position = table(inputLine, guideName);
                     continue;
                 }
 
+                //Skip instructions for windows command 
+                if(position.equals("windows")){
+                    if(positionNumber == 5){
+                        position  = "main";
+                        continue;
+                    }
+                    else{
+                        positionNumber += 1;
+                        continue;
+                    }
+                }
+
+                //Current line is an example output of a mvn test
                 if(position.equals("testBlock")){
                     if(!inputLine.startsWith("[INFO]")){
                         writeToFile("```\n",guideName);
@@ -343,47 +369,63 @@ public class GuideConverter{
                     }
                     continue;
                 }
-                
+
+                //Identifies an instruction for windows only and skips the current line
+                if(inputLine.equals("[.tab_content.windows_section]")){
+                    position = "windows";
+                    positionNumber = 0;
+                    continue;
+                }
+
+                //Identifies that line is the start of an example output of a mvn test
                 if(inputLine.startsWith("[INFO]")){
                     position = "testBlock";
                     writeToFile("```\n"+inputLine,guideName);
                     continue;
                 }
 
+                //Identifies that line is the start of a code block
                 if(inputLine.equals("```")){
                     position = "code";
                     continue;
                 }
                 
+                //Identifies that line is the start of a table
                 if(inputLine.equals("|===")){
                     position = "table";
                     continue;
                 }
+
+                //Skips over lines with ----
                 if(inputLine.equals("----")){
                     continue;
                 }
 
+                //Line is part of a code block
                 if(position.equals("code")){
                     if(inputLine.equals("----")){
                         writeToFile("```",guideName);
                         continue;
                     }
+                    //Code is a mvn instruction
                     else if(inputLine.startsWith("mvn")){
+                        //Adds copy button
                         writeToFile("```\n"+inputLine+"\n```\n{: codeblock}\n\n",guideName);
                         continue;
                     }
+                    //Identifies end of code block so carries out formatting
                     else{
                         position = "main";
                     }
                 }
 
-                //finds title and skips over irrelevant lines
+                //Finds title so we skip over irrelevant lines
                 if(inputLine.startsWith("= ")){
                     writeToFile(inputLine.replaceAll("=","#"), guideName);
                     position = "intro";
                 }
 
-                //identifies another heading after the intro and stops skipping over lines
+                //Identifies another heading after the intro so we stop skipping over lines
                 if(inputLine.startsWith("== ")){
                     position = "main";
                 }
@@ -393,47 +435,49 @@ public class GuideConverter{
                     continue;
                 }
 
-                //user is instructed to replace a file
+                //User is instructed to replace a file
                 if(inputLine.startsWith("#Replace")){
                     writeToFile(inputLine.replaceAll("#",""),guideName);
                     position = "replacePath"; //next lines need configuring so position is changed
                     continue;
                 }
 
-                //user is instructed to create a file
+                //User is instructed to create a file
                 if(inputLine.startsWith("#Create")){
                     writeToFile(inputLine.replaceAll("#",""),guideName);
                     position = "new"; //next lines need configuring so position is changed
                     continue;
                 }
 
-                //user is instructed to update a file
+                //User is instructed to update a file
                 if(inputLine.startsWith("#Update")){
                     writeToFile(inputLine.replaceAll("#",""),guideName);
                     position = "update"; //next lines need configuring so position is changed
                     continue;
                 }
 
-                //skips line, resets positionNumber and configures the replacement instructions
+                //Skips line, resets positionNumber and configures the replacement instructions
                 if(position.equals("replacePath")){
                     positionNumber = 0;
                     position = replace(inputLine, guideName);
                     continue;
                 }
 
+                //Skips line, resets positionNumber and configures the instructions for a new file
                 if(position.equals("new")){
                     positionNumber = 0;
                     position = touch(inputLine, guideName);
                     continue;
                 }
 
+                //Skips line, resets positionNumber and configures the instructions for a file update
                 if(position.equals("update")){
                     positionNumber = 0;
                     position = update(inputLine, guideName);
                     continue;
                 }
 
-                //identifies a link in the file line and configures it
+                //Identifies a link in the file line and configures it
                 if(inputLine.contains("^]")){
                     link(inputLine,guideName);    
                     continue;
@@ -468,11 +512,13 @@ public class GuideConverter{
                     tryBuildEnd(guideName);
                 }
                 
+                //Identifies the start of a table
                 if(inputLine.startsWith("[cols")){
                     position = "table";
                     continue;
                 }
-                
+
+                //Identifies the start of a table
                 if(inputLine.equals("Navigate to the `start` directory to begin.")){
                     start(guideName);
                     continue;
@@ -513,7 +559,7 @@ public class GuideConverter{
     // append to md file
     public static void writeToFile(String str, String guideName) 
     throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter("instructions/"+guideName+"/README.md",true));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(guideName+".md",true));
         writer.append("\n"+str);
         writer.close();
     }
