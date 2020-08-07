@@ -68,7 +68,7 @@ mvn install liberty:start-server
 
 You can find your service at http://localhost:9080/artists.
 
-Now, you can access the endpoint at http://localhost:9080/artists/total to see the total number of artists, and you can access the endpoint at **\http://localhost:9080/artists/total/<artist>** to see a particular artistâ€™s total number of albums.
+Now, you can access the endpoint at http://localhost:9080/artists/total to see the total number of artists, and you can access the endpoint at **\http://localhost:9080/artists/total/<artist>** to see a particular artist`s total number of albums.
 
 After you are finished checking out the application, stop the Open Liberty server by pressing `CTRL+C` in the shell session where you ran the server. Alternatively, you can run the `liberty:stop` goal from the `finish` directory in another shell session:
 
