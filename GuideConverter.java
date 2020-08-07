@@ -310,7 +310,7 @@ public class GuideConverter{
     public static void getMD(String guideName){
         try{
             //read adoc file
-            String httpsURL = "https://raw.githubusercontent.com/test-org-618/"+guideName+"/master/README.adoc";
+            String httpsURL = "https://raw.githubusercontent.com/openliberty/"+guideName+"/master/README.adoc";
             String FILENAME = "temp.adoc";
             BufferedWriter bw = new BufferedWriter(new FileWriter(FILENAME));
             URL myurl = new URL(httpsURL);
